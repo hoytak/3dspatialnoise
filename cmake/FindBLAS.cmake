@@ -413,7 +413,7 @@ else()
     get_filename_component(_lib "${_fn}" NAME)
     string(REPLACE "lib" "" _lib "${_lib}")
     string(REPLACE ".a" "" _lib "${_lib}")
-    string(REPLACE REGEXP "\\.so.*" "" _lib "${_lib}")
+    string(REPLACE ".so" "" _lib "${_lib}")
 
     if(BLAS_LIBRARIES_TMP)
       set(BLAS_LIBRARIES_TMP "${BLAS_LIBRARIES_TMP};${_lib}")
