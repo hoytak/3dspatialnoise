@@ -13,7 +13,7 @@ option(USE_OPENMP "Enable mutithreaded processing using OpenMP, if available" Ye
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(CheckCXXCompilerFlag)
 
-SET(CMAKE_CXX_FLAGS "-g -fPIC -Wall -Wcast-qual -Wno-sign-compare -Wno-write-strings -Wno-deprecated -Wno-deprecated-declarations -Wno-cast-qual -Wno-reorder -Wno-unused-label")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 set(STANDARD_LIBRARIES_TO_LINK_TO "")
 set(STANDARD_LINKER_FLAGS "")
@@ -98,6 +98,39 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   endif()
   
 endif(CMAKE_COMPILER_IS_GNUCXX)
+
+################################################################################
+# Now check for intel compiler
+
+if(${CMAKE_CXX_COMPILER} MATCHES "icpc.*$" 
+    OR ${CMAKE_CXX_COMPILER} MATCHES "Intel")
+  set(CMAKE_COMPILER_IS_INTEL Yes)
+endif()
+
+if(CMAKE_COMPILER_IS_INTEL)
+  message("Setting flags for intel compiler.")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd279,2536,411 -traceback")
+
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -UNDEBUG")
+  set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 -ipo -xHOST -no-prec-div -DNDEBUG")
+
+  if(CMAKE_BUILD_TYPE_TOLOWER STREQUAL "debug")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+  elseif(CMAKE_BUILD_TYPE_TOLOWER STREQUAL "release")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+  endif()
+
+    if(USE_OPENMP)
+      set(Boost_USE_MULTITHREADED  ON)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -openmp -DUSE_OPENMP")
+    else()
+      set(Boost_USE_MULTITHREADED  OFF)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -UUSE_OPENMP")
+    endif()
+
+endif(CMAKE_COMPILER_IS_INTEL)
+
+
 
 if(MSVC)
   # C4127 - conditional expression is constant

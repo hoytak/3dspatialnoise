@@ -161,6 +161,34 @@ else()
     # If Unix, search for BLAS function in possible libraries
     #
 
+    # BLAS in MKL (new version)?
+    if(NOT BLAS_LIBRARIES)
+      check_fortran_libraries(
+      BLAS_DEFINITIONS
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "mkl_blas95_lp64"
+      "${CMAKE_INSTALL_PREFIX}/lib ${LD_LIBRARY_PATH}"
+      )
+    endif()
+
+
+    # BLAS in MKL (old version)?
+    if(NOT BLAS_LIBRARIES)
+      check_fortran_libraries(
+      BLAS_DEFINITIONS
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "mkl_blas"
+      "${CMAKE_INSTALL_PREFIX}/lib ${LD_LIBRARY_PATH}"
+      )
+    endif()
+
+
     # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
     if(NOT BLAS_LIBRARIES)
       check_fortran_libraries(
@@ -410,31 +438,19 @@ else()
   set(BLAS_LIBRARIES_TMP "")
 
   foreach(_fn ${BLAS_LIBRARIES})
-    get_filename_component(_lib "${_fn}" NAME)
-    string(REPLACE "lib" "" _lib "${_lib}")
-    string(REPLACE ".a" "" _lib "${_lib}")
-    string(REPLACE REGEXP "\\.so.*" "" _lib "${_lib}")
-
-    if(BLAS_LIBRARIES_TMP)
-      set(BLAS_LIBRARIES_TMP "${BLAS_LIBRARIES_TMP};${_lib}")
-    else()
-      set(BLAS_LIBRARIES_TMP "${_lib}")
-    endif()
-      
+    get_filename_component(_file "${_fn}" NAME)
+    string(REPLACE "lib" "" _lib "${_file}")
+    set(BLAS_LIBRARIES_TMP "${BLAS_LIBRARIES_TMP};${_lib}")
+    
     get_filename_component(_path "${_fn}" PATH)
 
     if(NOT "${BLAS_LIBRARIES_DIR}" MATCHES ".*${_path}.*")
-      if(BLAS_LIBRARIES_DIR)
-	set(BLAS_LIBRARIES_DIR "${_path}")
-      else()
-	set(BLAS_LIBRARIES_DIR "${BLAS_LIBRARIES_DIR};${_path}")
-      endif()
+      set(BLAS_LIBRARIES_DIR "${BLAS_LIBRARIES_DIR};${_path}")
     endif()
+
   endforeach()
 
   set(BLAS_LIBRARIES "${BLAS_LIBRARIES_TMP}")
-
-  message("BL = ${BLAS_LIBRARIES}")
 
   # Add variables to cache
   set( BLAS_INCLUDE_DIR   "${BLAS_INCLUDE_DIR}"
