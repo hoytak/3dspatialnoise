@@ -2,7 +2,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#define G 6.67300e-11
+#define G 1 //6.67300e-11
 
 #include "typedefs.h"
 #include <cmath>
