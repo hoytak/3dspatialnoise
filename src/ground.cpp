@@ -7,7 +7,7 @@
 
 /* The main function for creating a new distribution. */
 template<class NoiseGenerator> 
-Ground* MakeNoisyGround(
+NoisyGround<NoiseGenerator>* MakeNoisyGround(
     double xl, double xu, double yl, double yu, double zl, double zu,
     size_t noise_particle_gridsize_per_meter, 
     size_t noise_order, size_t random_seed)
@@ -20,7 +20,7 @@ Ground* MakeNoisyGround(
 
 // Now wrap the above
 
-Ground* NoisyGround_BinaryCuttingPlanes(
+NoisyGround<BinaryCuttingPlanes>* NoisyGround_BinaryCuttingPlanes(
     double xl, double xu, double yl, double yu, double zl, double zu,
     size_t noise_particle_gridsize_per_meter, 
     size_t noise_order, size_t random_seed)
@@ -29,7 +29,7 @@ Ground* NoisyGround_BinaryCuttingPlanes(
 	xl,xu,yl,yu,zl,zu, noise_particle_gridsize_per_meter, noise_order, random_seed);
 }
 
-Ground* NoisyGround_UniformCuttingPlanes(
+NoisyGround<UniformCuttingPlanes>* NoisyGround_UniformCuttingPlanes(
     double xl, double xu, double yl, double yu, double zl, double zu,
     size_t noise_particle_gridsize_per_meter, 
     size_t noise_order, size_t random_seed)
@@ -38,12 +38,12 @@ Ground* NoisyGround_UniformCuttingPlanes(
 	xl,xu,yl,yu,zl,zu, noise_particle_gridsize_per_meter, noise_order, random_seed);
 }
 
-Ground* NoisyGround_NormalCuttingPlanes(
+NoisyGround<NormalCuttingPlanes>* NoisyGround_NormalCuttingPlanes(
     double xl, double xu, double yl, double yu, double zl, double zu,
     size_t noise_particle_gridsize_per_meter, 
     size_t noise_order, size_t random_seed)
 {
-    return MakeNoisyGround<UniformCuttingPlanes>(
+    return MakeNoisyGround<NormalCuttingPlanes>(
 	xl,xu,yl,yu,zl,zu, noise_particle_gridsize_per_meter, noise_order, random_seed);
 }
 

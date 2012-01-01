@@ -5,11 +5,15 @@
 #include "boost_shared_ptr.h"
 #include "geometry.h"
 
+#include <iostream>
+
 #include <vector>
 using namespace std;
 
 class Ground {
 public:
+
+    virtual ~Ground(){}
     virtual void excludeRegionFromNoise(double xl, double xu, double yl, double yu, double zl, double zu)=0;
     virtual void addNoiseToMeasurements(double_ptr mdata, cdouble_ptr m_pos_vect, csize_t n_measurements, 
 					cdouble noise_std_dev) const=0;
