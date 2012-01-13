@@ -6,6 +6,7 @@
 typedef const double                     cdouble;
 typedef const double *__restrict__ const cdouble_ptr;
 typedef double *__restrict__ const       double_ptr;
+typedef const double *__restrict__ const double_cptr;
 typedef const size_t                     csize_t;
 
 

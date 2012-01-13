@@ -6,6 +6,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(USE_OPENMP "Enable mutithreaded processing using OpenMP, if available" Yes)
+option(BUILD_PYTHON_EXTENSION "Build / install the python wrapper to the C++ library." Yes)
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_TOLOWER)
+
+if(    NOT CMAKE_BUILD_TYPE_TOLOWER STREQUAL "debug"
+   AND NOT CMAKE_BUILD_TYPE_TOLOWER STREQUAL "release")
+  message(FATAL_ERROR "Unknown build type \"${CMAKE_BUILD_TYPE}\". Allowed values are Debug and Release")
+endif()
+
 
 ################################################################################
 # Locate needed libraries
@@ -62,15 +71,15 @@ endif()
 # Check for compiler options; particularly OpenMP
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fipa-struct-reorg -fipa-cp -ftree-loop-linear -mfpmath=sse -ffast-math -fstrict-aliasing -floop-interchange -floop-block -floop-strip-mine -fno-common -Wno-long-long -Wwrite-strings")
-
   set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -UNDEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 -DNDEBUG -march=native -fipa-struct-reorg -fipa-cp -ftree-loop-linear -mfpmath=sse -ffast-math -fstrict-aliasing -floop-interchange -floop-block -floop-strip-mine")
 
   if(CMAKE_BUILD_TYPE_TOLOWER STREQUAL "debug")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+    message("Debug mode.")
   elseif(CMAKE_BUILD_TYPE_TOLOWER STREQUAL "release")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+    message("Release mode.")
   endif()
     
   check_cxx_compiler_flag("-Wno-variadic-macros" COMPILER_SUPPORT_WNOVARIADICMACRO)
@@ -168,18 +177,6 @@ if(MSVC)
 endif(MSVC)
 
 ########################################
-# Boost
-
-find_package( Boost )
-
-if(Boost_FOUND)
-  message("BOOST version ${Boost_VERSION} found.")
-  include_directories(${Boost_INCLUDE_DIRS})
-else()
-  message(FATAL_ERROR "BOOST library not found!")
-endif()
-
-########################################
 # GSL
 
 find_package( GSL )
@@ -193,10 +190,23 @@ else()
   message(FATAL_ERROR "GSL Libraries not found!")
 endif()
 
+########################################
+# eigen
+
+find_package( Eigen3 )
+
+if(EIGEN3_FOUND)
+  include_directories(${EIGEN3_INCLUDE_DIR})
+else()
+  message(FATAL_ERROR "Eigen3 Libraries not found!")
+endif()
+
 add_definitions(${CMAKE_CXX_FLAGS})
+
 
 ################################################################################
 # Install the C++ libraries
+
 add_subdirectory(src)
 
 install(
@@ -204,3 +214,5 @@ install(
   DESTINATION "${CMAKE_INSTALL_PREFIX}/include/3dspatialnoise"
   FILES_MATCHING PATTERN "*.h*" 
 )
+
+add_subdirectory(python)
