@@ -22,7 +22,7 @@ private:
     
   Eigen::ArrayXd noise_particle_weight;
 
-  cdouble pm_reflection_boundary, pm_crossing_rate, noise_scale;
+  cdouble pm_reflection_boundary, pm_base_length, noise_scale;
 
   const CuttingPlanes<WeightGenerator> density;
 
@@ -31,7 +31,7 @@ public:
 	     csize_t noise_particle_gridsize_per_meter, 
 	     cdouble cutting_plane_linear_density,
 	     csize_t random_seed, 
-	     cdouble _pm_reflection_boundary, cdouble _pm_crossing_rate)
+	     cdouble _pm_reflection_boundary, cdouble _pm_base_length)
    : bounds(xl, xu, yl, yu, zl, zu)
    , n_part_x(noise_particle_gridsize_per_meter*(xu - xl))
    , n_part_y(noise_particle_gridsize_per_meter*(yu - yl))
@@ -45,16 +45,8 @@ public:
    , part_z_start(zl + 0.5 * part_vz)
    , noise_particle_weight(n_part)
    , pm_reflection_boundary(_pm_reflection_boundary)
-   , pm_crossing_rate(_pm_crossing_rate)
-
-    // The crossing rate is given by 2*(1 - F(pm_reflection_boundary)),
-    // where F is the cdf of the standard 0,1 normal. (see Shorack,
-    // prob theory for statisticians, thereom 12.7.1).
-
-    // The current particle weights are calculated to be standard
-    // brownian motion.  Thus the scale factor is given by
-    // (pm_reflection_boundary / F^-1 ( 1 - pm_crossing_rate / 2))
-   , noise_scale(pm_reflection_boundary / gsl_cdf_ugaussian_Qinv(pm_crossing_rate / 2))
+   , pm_base_length(_pm_base_length)
+   , noise_scale(pm_reflection_boundary / pm_base_length)
 
    , density(cutting_plane_linear_density * ( (xu - xl) + (yu - yl) + (zu - zl)),
 	     random_seed, Box(xl, xu, yl, yu, zl, zu))
@@ -187,13 +179,21 @@ private:
   inline double getNoiseMass(double x, double y, double z) const {
 
     double mass = noise_scale * density(x, y, z);
+
+    // if (mass < -pm_reflection_boundary)
+    //   return -pm_reflection_boundary;
+    // if (mass > pm_reflection_boundary)
+    //   return pm_reflection_boundary;
+
+    // return mass;
+
     cdouble& a = pm_reflection_boundary;
 		
-    int sgn = (mass < 0) ? -1 : 1;
-    cdouble mod_abs_mass = fmod(abs(mass), 2*a);
+    cdouble mod_abs_mass = fmod(abs(mass + a), 4*a);
       
+    double rval = ((mod_abs_mass > 2*a) ? (4*a - mod_abs_mass) : mod_abs_mass) - a;
 
-    return sgn * ((mod_abs_mass > a) ? (2*a - mod_abs_mass) : mod_abs_mass);
+    return rval;
   }
 
   inline size_t getIndex(size_t xi, size_t yi, size_t zi) const {

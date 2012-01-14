@@ -7,47 +7,44 @@
 
 class BinaryNoiseDistribution {
  public:
- BinaryNoiseDistribution(csize_t num_cutting_planes, gsl_rng *_r) 
-   : scale_factor(1.0 / sqrt(double(num_cutting_planes))), r(_r)
+ BinaryNoiseDistribution(gsl_rng *_r) 
+   : r(_r)
     {}
 
   double operator()() const {
-    return ((gsl_ran_bernoulli(r, 0.5) == 0) ? -1 : 1)*scale_factor;
+    return ((gsl_ran_bernoulli(r, 0.5) != 0) ? -1 : 1);
   }
 
  private:
-  double scale_factor;
   gsl_rng *r;
 };
 
 
 class NormalNoiseDistribution {
  public:
- NormalNoiseDistribution(csize_t num_cutting_planes, gsl_rng *_r) 
-   : scale_factor(1.0 / sqrt(double(num_cutting_planes))), r(_r)
+ NormalNoiseDistribution(gsl_rng *_r) 
+   : r(_r)
     {}
 
   double operator()() const {
-    return gsl_ran_gaussian(r, 1) * scale_factor;
+    return gsl_ran_gaussian(r, 1);
   }
 
  private:
-  double scale_factor;
   gsl_rng *r;
 };
 
 class UniformNoiseDistribution {
  public:
  UniformNoiseDistribution(csize_t num_cutting_planes, gsl_rng *_r)
-   : scale_factor((4.0 / 12) / sqrt(double(num_cutting_planes))), r(_r)
+   : r(_r)
     {}
 
   double operator()() const {
-    return gsl_ran_flat(r, -1, 1) * scale_factor;
+    return gsl_ran_flat(r, -1, 1);
   }
 
  private:
-  double scale_factor;
   gsl_rng *r;
 };
 

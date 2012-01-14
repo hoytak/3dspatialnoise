@@ -38,7 +38,7 @@ cdef class NoisyGround:
             npt.cutting_plane_linear_density,
             npt.random_seed,
             npt.pm_reflection_boundary,
-            npt.pm_crossing_rate)
+            npt.pm_base_length)
 
     def __dealloc__(self):
         del self.ground

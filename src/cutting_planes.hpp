@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <utility>
+#include <iostream>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_statistics_double.h>
@@ -16,6 +17,8 @@ using std::vector;
 using std::pair;
 using std::make_pair;
 
+using namespace std;
+
 template <class WeightGenerator> class CuttingPlanes 
 {
 public:
@@ -25,6 +28,7 @@ public:
     , weights(_num_cutting_planes)
     , num_cutting_planes(_num_cutting_planes)
   {
+
     gsl_rng_env_setup();
 
     const gsl_rng_type *T = gsl_rng_default;
@@ -32,7 +36,7 @@ public:
     gsl_rng_set(r, random_seed);
 
     // First, generate the weights
-    WeightGenerator wg(num_cutting_planes, r);
+    WeightGenerator wg(r);
     for(size_t i = 0; i < num_cutting_planes; ++i)
       weights[i] = wg();
 
@@ -46,8 +50,9 @@ public:
     {
     plane_invalid:
 
-      // Choose a point randomly in the containing sphere
-      cdouble radius = R*pow(gsl_ran_flat(r, 0, 1), 1.0 / 3);
+      // Choose a point randomly in the containing sphere; is straight up as
+      // we're fitting a plane
+      cdouble radius = gsl_ran_flat(r, 0, R); // R*pow(gsl_ran_flat(r, 0, 1), 1.0 / 2);
 
       double vx, vy, vz;     
       gsl_ran_dir_3d(r, &vx, &vy, &vz);
@@ -76,7 +81,7 @@ public:
     // random points; get the standard deviation of difference, then scale so
     // it's 1 per meter
 
-    const size_t N = 500;
+    const size_t N = 1000;
     double values[N];
 
     vector<pair<Point, Point> > pos;
