@@ -33,7 +33,7 @@ public:
 
     // First, generate the weights
     WeightGenerator wg(num_cutting_planes, r);
-    for(size_t i = 0; i <= num_cutting_planes; ++i)
+    for(size_t i = 0; i < num_cutting_planes; ++i)
       weights[i] = wg();
 
     // Now all the points
